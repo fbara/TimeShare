@@ -16,6 +16,43 @@ class MessagesViewController: MSMessagesAppViewController {
         // Do any additional setup after loading the view.
     }
     
+    @IBAction func createNewEvent(_ sender: UIButton) {
+        requestPresentationStyle(.expanded)
+    }
+    
+    // MARK: - Add Child VC
+    
+    /// Add a child view controller into the main view controller.
+    ///
+    /// - Parameters:
+    ///   - conversation: MSConversation optional.
+    ///   - identifier: Which view controller should be displayed?
+    func displayEventViewController(conversation: MSConversation?, identifier: String) {
+        // sanity check, is there a conversation?
+        guard let conversation = conversation else { return }
+        
+        // create the child view controller.
+        guard let vc = storyboard?.instantiateViewController(withIdentifier: identifier) as? EventViewController else { return }
+        
+        // add the child to the parent so that events are forwarded.
+        addChild(vc)
+        
+        // give the child a meaningful frame: make it fill our view.
+        vc.view.frame = view.bounds
+        vc.view.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(vc.view)
+        
+        // add Auto Layout constraints so the child view continues to fill the full view.
+        vc.view.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        vc.view.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        vc.view.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        vc.view.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
+        // ell the child it has now moved to a new parent view controller.
+        vc.didMove(toParent: self)
+
+    }
+    
     // MARK: - Conversation Handling
     
     override func willBecomeActive(with conversation: MSConversation) {
@@ -55,7 +92,17 @@ class MessagesViewController: MSMessagesAppViewController {
     override func willTransition(to presentationStyle: MSMessagesAppPresentationStyle) {
         // Called before the extension transitions to a new presentation style.
     
-        // Use this method to prepare for the change in presentation style.
+        // before creating any child view controllers we need to clear out any that already exist,
+        // effectively resetting our main controller before we do any fresh work.
+        for child in children {
+            child.willMove(toParent: nil)
+            child.view.removeFromSuperview()
+            child.removeFromParent()
+        }
+        
+        if presentationStyle == .expanded {
+            displayEventViewController(conversation: activeConversation, identifier: "CreateEvent")
+        }
     }
     
     override func didTransition(to presentationStyle: MSMessagesAppPresentationStyle) {
