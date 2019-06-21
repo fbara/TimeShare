@@ -7,12 +7,15 @@
 //
 
 import UIKit
+import Messages
 
 class EventViewController: UIViewController {
     
     var dates = [Date]()
     var allVotes = [Int]()
     var ourVotes = [Int]()
+    // delegate to pass info back and forth
+    weak var delegate: MessagesViewController!
 
     @IBOutlet weak var EventTable: UITableView!
     @IBOutlet weak var DatePicker: UIDatePicker!
@@ -25,7 +28,13 @@ class EventViewController: UIViewController {
     }
     
     @IBAction func saveSelectedDates(_ sender: Any) {
+        var finalVotes = [Int]()
         
+        for (index, votes) in allVotes.enumerated() {
+            finalVotes.append(votes + ourVotes[index])
+        }
+        
+        delegate.createMessage(with: dates, votes: finalVotes)
     }
     
     @IBAction func addDate(_ sender: Any) {
@@ -46,7 +55,39 @@ class EventViewController: UIViewController {
         EventTable.flashScrollIndicators()
 
     }
+    
+    // MARK: - Get Dates & Votes
+    
+    func load(from message: MSMessage?) {
+        // check that everything we need is available
+        guard let message = message else { return }
+        guard let messageURL = message.url else { return }
+        guard let urlComponents = URLComponents(url: messageURL, resolvingAgainstBaseURL: false) else { return }
+        guard let queryItems = urlComponents.queryItems else { return }
+        
+        for item in queryItems {
+            if item.name .hasPrefix("date-") {
+                dates.append(date(from: item.value ?? ""))
+            } else if item.name .hasPrefix("vote-") {
+                //That means “if the item has a value use it, otherwise use an empty string;
+                //then create an integer out of that value, but if that fails use 0.”
+                //It’s not pretty, but it would have been a darn sight worse without nil coalescing!
+                let voteCount = Int(item.value ?? "") ?? 0
+                allVotes.append(voteCount)
+                ourVotes.append(0)
+            }
+        }
+    }
 
+    // MARK: - Helper Functions
+    
+    func date(from string: String)-> Date {
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        dateFormatter.dateFormat = "yyyy-MM-dd-HH-mm"
+        
+        return dateFormatter.date(from: string) ?? Date()
+    }
 
 }
 // MARK: - TableView Methods

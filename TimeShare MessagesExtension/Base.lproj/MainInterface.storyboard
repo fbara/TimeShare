@@ -91,7 +91,6 @@
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="eaQ-g1-f8N" secondAttribute="bottom" id="5cl-BB-IBQ"/>
-                                    <constraint firstAttribute="height" constant="216" id="5uM-c1-zVc"/>
                                     <constraint firstAttribute="trailing" secondItem="eaQ-g1-f8N" secondAttribute="trailing" id="7J5-kR-gzp"/>
                                     <constraint firstItem="eaQ-g1-f8N" firstAttribute="top" secondItem="IWn-WY-z31" secondAttribute="top" id="Le3-3j-f9r"/>
                                     <constraint firstItem="eaQ-g1-f8N" firstAttribute="leading" secondItem="IWn-WY-z31" secondAttribute="leading" id="iIA-EJ-Ftc"/>
